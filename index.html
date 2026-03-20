@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FL-Studio Pattern Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Генератор паттернов для FL-Studio</h1>
+    
+    <div class="toolbar">
+      <div class="control-group">
+        <label for="tone">Тональность:</label>
+        <select id="tone">
+          <option value="major">Мажор</option>
+          <option value="minor">Минор</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label for="length">Длина:</label>
+        <input type="range" id="length" min="1" max="64" value="16">
+        <span id="lengthValue">16</span>
+      </div>
+      
+      <div class="control-group">
+        <label for="bpm">BPM:</label>
+        <input type="range" id="bpm" min="40" max="240" value="120">
+        <span id="bpmValue">120</span>
+      </div>
+      
+      <button id="generateBtn">Сгенерировать</button>
+      <button id="exportBtn">Экспорт MIDI</button>
+    </div>
+    
+    <div class="editor">
+      <div class="note-labels" id="noteLabels"></div>
+      <div class="grid-container">
+        <div id="patternGrid" class="grid"></div>
+      </div>
+    </div>
+    
+    <div class="info-panel">
+      <h3>Информация</h3>
+      <div id="patternInfo"></div>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
