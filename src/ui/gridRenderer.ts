@@ -91,11 +91,12 @@ export class GridRenderer {
     const cells = this.grid.querySelectorAll('.grid-cell.active');
     
     cells.forEach(cell => {
-      const octave = parseInt(cell.dataset.octave || '4');
-      const step = parseInt(cell.dataset.step || '0');
+      const htmlCell = cell as HTMLElement;
+      const octave = parseInt(htmlCell.dataset.octave || '4');
+      const step = parseInt(htmlCell.dataset.step || '0');
       
       // Определяем pitch на основе названия ноты (упрощенно)
-      const noteName = cell.previousElementSibling?.textContent || 'C';
+      const noteName = (cell.previousElementSibling?.textContent || 'C').trim();
       const noteIndex = this.config.noteNames.indexOf(noteName);
       
       notes.push({
@@ -103,7 +104,7 @@ export class GridRenderer {
         octave,
         duration: 1,
         velocity: 100,
-        color: cell.style.backgroundColor || '#4CAF50'
+        color: htmlCell.style.backgroundColor || '#4CAF50'
       });
     });
     
