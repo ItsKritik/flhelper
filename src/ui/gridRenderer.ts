@@ -37,33 +37,12 @@ export class GridRenderer {
 	}
 
 	public render(pattern: Pattern | null = null): void {
-		// Определяем диапазон используемых нот в паттерне
-		const usedNotes = pattern ? this.getUsedNoteRange(pattern) : null;
-
-		// Если есть паттерн и использованные ноты, ограничиваем диапазон
-		let renderOctaves = this.config.octaves;
-		let renderNoteNames = this.config.noteNames;
-
-		if (usedNotes) {
-			renderOctaves = this.filterOctaves(
-				this.config.octaves,
-				usedNotes.minOctave,
-				usedNotes.maxOctave,
-			);
-
-			// Также определяем используемые ноты в пределах октав
-			renderNoteNames = this.filterNoteNames(
-				this.config.noteNames,
-				usedNotes.minPitch,
-				usedNotes.maxPitch,
-			);
-		}
+		const rows = this.getRenderRows(pattern);
 
 		this.grid.innerHTML = "";
 		this.noteLabels.innerHTML = "";
 
-		// Создаем структуру: каждая строка = одна нота (pitch + octave)
-		const totalRows = renderOctaves.length * renderNoteNames.length;
+		const totalRows = rows.length;
 
 		// Устанавливаем grid layout
 		this.grid.style.display = "grid";
@@ -83,143 +62,123 @@ export class GridRenderer {
 		const noteMap = this.createNoteMap(pattern);
 
 		// Рендерим каждую строку (нота + октава)
-		for (const octave of renderOctaves) {
-			for (let noteIndex = 0; noteIndex < renderNoteNames.length; noteIndex++) {
-				const noteName = renderNoteNames[noteIndex];
-				const pitch = this.config.noteNames.indexOf(noteName); // Используем реальный pitch
+		for (const row of rows) {
+			const noteName = this.getNoteName(row.pitch);
 
-				// Лейбл ноты
-				const label = document.createElement("div");
-				label.className = "note-label";
-				label.textContent = `${noteName}${octave}`;
-				label.style.background = this.isBlackKey(pitch)
-					? "var(--label-dark)"
-					: "var(--label-light)";
-				label.style.fontSize = "10px";
-				label.style.display = "flex";
-				label.style.alignItems = "center";
-				label.style.justifyContent = "center";
-				label.style.borderRight = "1px solid var(--border)";
-				this.noteLabels.appendChild(label);
+			const label = document.createElement("div");
+			label.className = "note-label";
+			label.textContent = `${noteName}${row.octave}`;
+			label.style.background = this.isBlackKey(row.pitch)
+				? "var(--label-dark)"
+				: "var(--label-light)";
+			label.style.fontSize = "10px";
+			label.style.display = "flex";
+			label.style.alignItems = "center";
+			label.style.justifyContent = "center";
+			label.style.borderRight = "1px solid var(--border)";
+			this.noteLabels.appendChild(label);
 
-				// Ячейки для каждого шага
-				for (let step = 0; step < this.config.length; step++) {
-					const cell = document.createElement("div");
-					cell.className = "grid-cell";
-					cell.dataset.pitch = pitch.toString();
-					cell.dataset.octave = octave.toString();
-					cell.dataset.step = step.toString();
+			for (let step = 0; step < this.config.length; step++) {
+				const cell = document.createElement("div");
+				cell.className = "grid-cell";
+				cell.dataset.pitch = row.pitch.toString();
+				cell.dataset.octave = row.octave.toString();
+				cell.dataset.step = step.toString();
 
-					// Стиль ячейки
-					cell.style.background = this.isBlackKey(pitch)
-						? "var(--cell-dark)"
-						: "var(--cell-light)";
-					cell.style.cursor = "pointer";
-					cell.style.borderRadius = "8px";
+				cell.style.background = this.isBlackKey(row.pitch)
+					? "var(--cell-dark)"
+					: "var(--cell-light)";
+				cell.style.cursor = "pointer";
+				cell.style.borderRadius = "8px";
 
-					// Подсветка каждого 4-го шага
-					if (step % 4 === 0) {
-						cell.style.boxShadow = "inset 2px 0 0 rgba(124, 92, 255, 0.24)";
-					}
-
-					// Проверяем, есть ли нота в этой позиции
-					const noteKey = `${pitch}-${octave}-${step}`;
-					if (noteMap.has(noteKey)) {
-						const note = noteMap.get(noteKey);
-						if (note) {
-							cell.classList.add("active");
-							cell.style.background = note.color;
-							cell.style.opacity = (note.velocity / 127).toString();
-							cell.style.borderRadius = "10px";
-							cell.title = `${noteName}${octave} - Velocity: ${note.velocity}`;
-
-							// Если нота длится несколько шагов, растягиваем её
-							if (note.duration > 1) {
-								cell.style.gridColumn = `span ${note.duration}`;
-							}
-						}
-					}
-
-					// Hover эффект
-					cell.addEventListener("mouseenter", () => {
-						if (!cell.classList.contains("active")) {
-							cell.style.background = "var(--cell-hover)";
-						}
-					});
-
-					cell.addEventListener("mouseleave", () => {
-						if (!cell.classList.contains("active")) {
-							cell.style.background = this.isBlackKey(pitch)
-								? "var(--cell-dark)"
-								: "var(--cell-light)";
-						}
-					});
-
-					this.grid.appendChild(cell);
+				if (step % 4 === 0) {
+					cell.style.boxShadow = "inset 2px 0 0 rgba(124, 92, 255, 0.24)";
 				}
+
+				const noteKey = `${row.pitch}-${row.octave}-${step}`;
+				if (noteMap.has(noteKey)) {
+					const note = noteMap.get(noteKey);
+					if (note) {
+						cell.classList.add("active");
+						cell.style.background = note.color;
+						cell.style.opacity = (note.velocity / 127).toString();
+						cell.style.borderRadius = "10px";
+						cell.title = `${noteName}${row.octave} - Velocity: ${note.velocity}`;
+
+						if (note.duration > 1) {
+							cell.style.gridColumn = `span ${note.duration}`;
+						}
+					}
+				}
+
+				cell.addEventListener("mouseenter", () => {
+					if (!cell.classList.contains("active")) {
+						cell.style.background = "var(--cell-hover)";
+					}
+				});
+
+				cell.addEventListener("mouseleave", () => {
+					if (!cell.classList.contains("active")) {
+						cell.style.background = this.isBlackKey(row.pitch)
+							? "var(--cell-dark)"
+							: "var(--cell-light)";
+					}
+				});
+
+				this.grid.appendChild(cell);
 			}
 		}
 	}
 
-	private getUsedNoteRange(pattern: Pattern): {
-		minOctave: number;
-		maxOctave: number;
-		minPitch: number;
-		maxPitch: number;
-	} {
+	private getRenderRows(pattern: Pattern | null): Array<{
+		pitch: number;
+		octave: number;
+	}> {
 		if (!pattern || pattern.notes.length === 0) {
-			return { minOctave: 4, maxOctave: 5, minPitch: 0, maxPitch: 11 }; // По умолчанию
+			return [
+				{ pitch: 7, octave: 5 },
+				{ pitch: 4, octave: 5 },
+				{ pitch: 0, octave: 5 },
+				{ pitch: 7, octave: 4 },
+				{ pitch: 4, octave: 4 },
+				{ pitch: 0, octave: 4 },
+			];
 		}
 
-		let minOctave = 99;
-		let maxOctave = -1;
-		let minPitch = 99;
-		let maxPitch = -1;
-
+		const rows = new Map<string, { pitch: number; octave: number }>();
 		for (const note of pattern.notes) {
-			minOctave = Math.min(minOctave, note.octave);
-			maxOctave = Math.max(maxOctave, note.octave);
-			minPitch = Math.min(minPitch, note.pitch);
-			maxPitch = Math.max(maxPitch, note.pitch);
+			rows.set(`${note.octave}-${note.pitch}`, {
+				pitch: note.pitch,
+				octave: note.octave,
+			});
 		}
 
-		return { minOctave, maxOctave, minPitch, maxPitch };
-	}
+		return Array.from(rows.values()).sort((left, right) => {
+			if (left.octave !== right.octave) {
+				return right.octave - left.octave;
+			}
 
-	private filterOctaves(
-		allOctaves: number[],
-		minOctave: number,
-		maxOctave: number,
-	): number[] {
-		// Убедимся, что хотя бы одна октава возвращается
-		if (minOctave > maxOctave) {
-			return [Math.max(...allOctaves)];
-		}
-
-		const filtered = allOctaves.filter(
-			(octave) => octave >= minOctave && octave <= maxOctave,
-		);
-		return filtered.length > 0 ? filtered : [4]; // Если не нашли подходящие октавы, вернем 4
-	}
-
-	private filterNoteNames(
-		allNoteNames: string[],
-		minPitch: number,
-		maxPitch: number,
-	): string[] {
-		// Получаем индексы нот на основе pitch
-		const pitchesInRange = Array.from(
-			{ length: maxPitch - minPitch + 1 },
-			(_, i) => i + minPitch,
-		);
-		const filteredNoteNames = allNoteNames.filter((_, index) => {
-			const pitch = allNoteNames.length - 1 - index; // Инвертируем индекс для правильного pitch
-			return pitchesInRange.includes(pitch);
+			return right.pitch - left.pitch;
 		});
+	}
 
-		return filteredNoteNames.length > 0
-			? filteredNoteNames
-			: allNoteNames.slice(5, 8); // Вернем C, C#, D по умолчанию
+	private getNoteName(pitch: number): string {
+		const noteNames = [
+			"C",
+			"C#",
+			"D",
+			"D#",
+			"E",
+			"F",
+			"F#",
+			"G",
+			"G#",
+			"A",
+			"A#",
+			"B",
+		];
+
+		return noteNames[pitch] ?? "C";
 	}
 
 	private createNoteMap(pattern: Pattern | null): Map<string, Note> {

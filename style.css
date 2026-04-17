@@ -144,11 +144,7 @@ h1 {
 	min-width: 170px;
 	border-radius: 22px;
 	padding: 16px 18px;
-	background: linear-gradient(
-		135deg,
-		rgba(124, 92, 255, 0.22),
-		rgba(106, 220, 255, 0.14)
-	);
+	background: rgba(124, 92, 255, 0.14);
 	border: 1px solid var(--border-strong);
 	display: grid;
 	gap: 8px;
@@ -288,19 +284,23 @@ button:hover {
 }
 
 #generateBtn {
-	background: linear-gradient(
-		135deg,
-		var(--accent) 0%,
-		var(--accent-strong) 100%
-	);
+	background: var(--accent);
 	color: #ffffff;
 	box-shadow: 0 12px 32px rgba(92, 92, 255, 0.22);
 }
 
+#generateBtn:hover {
+	background: color-mix(in srgb, var(--accent) 88%, black);
+}
+
 #exportBtn {
-	background: transparent;
+	background: var(--surface-strong);
 	color: var(--text);
 	border-color: var(--border-strong);
+}
+
+#exportBtn:hover {
+	background: color-mix(in srgb, var(--surface-strong) 86%, var(--text) 14%);
 }
 
 .workspace {
