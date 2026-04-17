@@ -8,44 +8,80 @@
 </head>
 <body>
   <div class="container">
-    <h1>Генератор паттернов для FL-Studio</h1>
-    
-    <div class="toolbar">
-      <div class="control-group">
-        <label for="tone">Тональность:</label>
+    <header class="hero-panel">
+      <div>
+        <p class="eyebrow">FL Helper</p>
+        <h1>Генератор музыкальных паттернов для FL Studio</h1>
+        <p class="hero-copy">
+          Быстро собирай гармонические заготовки, меняй характер паттерна и сразу смотри
+          результат в более читаемом piano roll.
+        </p>
+      </div>
+      <div class="hero-badge">
+        <span class="hero-badge-label">Режим</span>
+        <strong>Pattern Design</strong>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="Параметры генерации">
+      <div class="control-group control-card">
+        <label for="tone">Тональность</label>
         <select id="tone">
           <option value="major">Мажор</option>
           <option value="minor">Минор</option>
         </select>
       </div>
-      
-      <div class="control-group">
-        <label for="length">Длина:</label>
-        <input type="range" id="length" min="1" max="64" value="16">
-        <span id="lengthValue">16</span>
+
+      <div class="control-group control-card control-card-wide">
+        <div class="control-header">
+          <label for="length">Длина</label>
+          <span id="lengthValue" class="control-value">16 шагов</span>
+        </div>
+        <input type="range" id="length" min="1" max="40" value="16">
       </div>
-      
-      <div class="control-group">
-        <label for="bpm">BPM:</label>
+
+      <div class="control-group control-card control-card-wide">
+        <div class="control-header">
+          <label for="bpm">Темп</label>
+          <span id="bpmValue" class="control-value">120 BPM</span>
+        </div>
         <input type="range" id="bpm" min="40" max="240" value="120">
-        <span id="bpmValue">120</span>
       </div>
-      
-      <button id="generateBtn">Сгенерировать</button>
-      <button id="exportBtn">Экспорт MIDI</button>
-    </div>
-    
-    <div class="editor">
-      <div class="note-labels" id="noteLabels"></div>
-      <div class="grid-container">
-        <div id="patternGrid" class="grid"></div>
+
+      <div class="actions-card">
+        <button type="button" id="generateBtn">Сгенерировать</button>
+        <button type="button" id="exportBtn">Экспорт MIDI</button>
       </div>
-    </div>
-    
-    <div class="info-panel">
-      <h3>Информация</h3>
-      <div id="patternInfo"></div>
-    </div>
+    </section>
+
+    <section class="workspace">
+      <div class="editor">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Редактор</p>
+            <h2>Piano Roll Preview</h2>
+          </div>
+          <p class="panel-note">Каждый 4-й шаг выделен для быстрого чтения ритма.</p>
+        </div>
+
+        <div class="grid-shell">
+          <div class="grid-container">
+            <div id="noteLabels" class="note-labels"></div>
+            <div id="patternGrid" class="grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="info-panel">
+        <div class="panel-heading panel-heading-compact">
+          <div>
+            <p class="panel-kicker">Аналитика</p>
+            <h2>Информация о паттерне</h2>
+          </div>
+        </div>
+        <div id="patternInfo"></div>
+      </aside>
+    </section>
   </div>
   
   <script type="module" src="/src/index.ts"></script>
