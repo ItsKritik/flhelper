@@ -62,7 +62,7 @@ export class GridRenderer {
 		const noteMap = this.createNoteMap(pattern);
 
 		// Рендерим каждую строку (нота + октава)
-		for (const row of rows) {
+		for (const [rowIndex, row] of rows.entries()) {
 			const noteName = this.getNoteName(row.pitch);
 
 			const label = document.createElement("div");
@@ -84,6 +84,8 @@ export class GridRenderer {
 				cell.dataset.pitch = row.pitch.toString();
 				cell.dataset.octave = row.octave.toString();
 				cell.dataset.step = step.toString();
+				cell.style.setProperty("--step", step.toString());
+				cell.style.setProperty("--row", rowIndex.toString());
 
 				cell.style.background = this.isBlackKey(row.pitch)
 					? "var(--cell-dark)"

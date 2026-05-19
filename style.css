@@ -26,6 +26,8 @@
 	--accent-warm: #ff9f67;
 	--success: #67d98b;
 	--shadow: 0 20px 60px rgba(1, 7, 20, 0.45);
+	--shadow-3d: 0 26px 70px rgba(1, 7, 20, 0.52),
+		0 2px 0 rgba(255, 255, 255, 0.08) inset;
 	--cell-dark: #10182a;
 	--cell-light: #172238;
 	--cell-hover: #243455;
@@ -62,6 +64,8 @@
 		--accent-warm: #f97316;
 		--success: #16a34a;
 		--shadow: 0 20px 60px rgba(80, 98, 142, 0.16);
+		--shadow-3d: 0 26px 70px rgba(80, 98, 142, 0.22),
+			0 2px 0 rgba(255, 255, 255, 0.7) inset;
 		--cell-dark: #dde6fb;
 		--cell-light: #eef3ff;
 		--cell-hover: #d2defa;
@@ -87,6 +91,96 @@ body {
 	color: var(--text);
 	min-height: 100vh;
 	padding: 24px;
+	overflow-x: hidden;
+}
+
+body::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	background-image:
+		linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+	background-size: 48px 48px;
+	mask-image: radial-gradient(circle at 50% 20%, black, transparent 72%);
+	animation: gridDrift 18s linear infinite;
+	z-index: -3;
+}
+
+.scene-bg {
+	position: fixed;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+	perspective: 900px;
+	z-index: -2;
+}
+
+.orb {
+	position: absolute;
+	display: block;
+	width: 360px;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	filter: blur(10px);
+	opacity: 0.42;
+	background: radial-gradient(circle at 35% 30%, #ffffff, var(--accent), transparent 68%);
+	animation: floatOrb 12s ease-in-out infinite;
+}
+
+.orb-one {
+	top: -120px;
+	left: -80px;
+}
+
+.orb-two {
+	right: -120px;
+	top: 18%;
+	background: radial-gradient(circle at 35% 30%, #ffffff, var(--accent-strong), transparent 68%);
+	animation-delay: -4s;
+}
+
+.orb-three {
+	width: 260px;
+	left: 42%;
+	bottom: -110px;
+	background: radial-gradient(circle at 35% 30%, #ffffff, var(--accent-warm), transparent 68%);
+	animation-delay: -8s;
+}
+
+.equalizer-3d {
+	position: absolute;
+	right: 8vw;
+	top: 88px;
+	display: flex;
+	align-items: end;
+	gap: 10px;
+	transform: rotateX(58deg) rotateZ(-18deg) translateZ(-40px);
+	transform-style: preserve-3d;
+	opacity: 0.42;
+}
+
+.equalizer-3d span {
+	display: block;
+	width: 18px;
+	height: 86px;
+	border-radius: 999px;
+	background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+	box-shadow:
+		0 0 22px rgba(106, 220, 255, 0.42),
+		0 18px 38px rgba(0, 0, 0, 0.28);
+	animation: equalizerPulse 1.7s ease-in-out infinite;
+}
+
+.equalizer-3d span:nth-child(2n) {
+	height: 126px;
+	animation-delay: -0.35s;
+}
+
+.equalizer-3d span:nth-child(3n) {
+	height: 64px;
+	animation-delay: -0.7s;
 }
 
 .container {
@@ -94,6 +188,7 @@ body {
 	margin: 0 auto;
 	display: grid;
 	gap: 20px;
+	animation: pageReveal 0.75s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
 .hero-panel,
@@ -104,6 +199,20 @@ body {
 	border: 1px solid var(--border);
 	box-shadow: var(--shadow);
 	backdrop-filter: blur(18px);
+	transform-style: preserve-3d;
+	transition:
+		transform 0.28s ease,
+		box-shadow 0.28s ease,
+		border-color 0.28s ease;
+}
+
+.hero-panel:hover,
+.toolbar:hover,
+.editor:hover,
+.info-panel:hover {
+	border-color: var(--border-strong);
+	box-shadow: var(--shadow-3d);
+	transform: translateY(-2px) rotateX(0.35deg);
 }
 
 .hero-panel {
@@ -113,6 +222,22 @@ body {
 	justify-content: space-between;
 	gap: 24px;
 	align-items: flex-start;
+	position: relative;
+	overflow: hidden;
+}
+
+.hero-panel::before {
+	content: "";
+	position: absolute;
+	inset: -40% -20%;
+	background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.11), transparent 65%);
+	transform: translateX(-45%);
+	animation: shimmer 7s ease-in-out infinite;
+}
+
+.hero-panel > * {
+	position: relative;
+	z-index: 1;
 }
 
 .eyebrow,
@@ -148,6 +273,10 @@ h1 {
 	border: 1px solid var(--border-strong);
 	display: grid;
 	gap: 8px;
+	box-shadow:
+		0 18px 38px rgba(0, 0, 0, 0.18),
+		0 1px 0 rgba(255, 255, 255, 0.12) inset;
+	animation: badgeFloat 4.6s ease-in-out infinite;
 }
 
 .hero-badge strong {
@@ -177,6 +306,19 @@ h1 {
 	border: 1px solid var(--border);
 	border-radius: 20px;
 	padding: 16px;
+	transition:
+		transform 0.2s ease,
+		background 0.2s ease,
+		border-color 0.2s ease;
+}
+
+.control-card:hover,
+.actions-card:hover,
+.metric-card:hover,
+.pattern-note-list:hover {
+	transform: translateY(-2px);
+	border-color: var(--border-strong);
+	background: color-mix(in srgb, var(--surface-soft) 76%, var(--accent) 24%);
 }
 
 .control-header {
@@ -277,10 +419,29 @@ button {
 		transform 0.18s ease,
 		box-shadow 0.18s ease,
 		background 0.18s ease;
+	position: relative;
+	overflow: hidden;
+}
+
+button::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.24), transparent 70%);
+	transform: translateX(-120%);
+	transition: transform 0.45s ease;
+}
+
+button:hover::after {
+	transform: translateX(120%);
 }
 
 button:hover {
-	transform: translateY(-1px);
+	transform: translateY(-2px) scale(1.01);
+}
+
+button:active {
+	transform: translateY(1px) scale(0.99);
 }
 
 #generateBtn {
@@ -351,6 +512,7 @@ button:hover {
 		rgba(255, 255, 255, 0.02)
 	);
 	border: 1px solid var(--border);
+	perspective: 1200px;
 }
 
 .note-labels {
@@ -377,6 +539,16 @@ button:hover {
 	background: var(--bg);
 	display: flex;
 	min-width: 100%;
+	box-shadow:
+		0 24px 60px rgba(0, 0, 0, 0.24),
+		0 1px 0 rgba(255, 255, 255, 0.08) inset;
+	transform: rotateX(0deg);
+	transform-origin: top center;
+	transition: transform 0.35s ease;
+}
+
+.grid-shell:hover .grid-container {
+	transform: rotateX(2.2deg) rotateY(-0.8deg);
 }
 
 .grid {
@@ -390,16 +562,46 @@ button:hover {
 		transform 0.12s ease,
 		box-shadow 0.12s ease;
 	position: relative;
+	overflow: hidden;
+	animation: cellIn 0.42s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+	animation-delay: calc(var(--step, 0) * 14ms + var(--row, 0) * 8ms);
+}
+
+.grid-cell::before {
+	content: "";
+	position: absolute;
+	inset: 1px;
+	border-radius: inherit;
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 48%);
+	opacity: 0;
+	transition: opacity 0.2s ease;
 }
 
 .grid-cell:hover {
-	transform: scale(0.98);
+	transform: translateZ(12px) scale(1.04);
+	z-index: 2;
+}
+
+.grid-cell:hover::before {
+	opacity: 1;
 }
 
 .grid-cell.active {
 	box-shadow:
 		inset 0 0 0 1px rgba(255, 255, 255, 0.26),
-		0 0 0 1px rgba(0, 0, 0, 0.12);
+		0 0 0 1px rgba(0, 0, 0, 0.12),
+		0 10px 24px rgba(0, 0, 0, 0.3),
+		0 0 22px color-mix(in srgb, currentColor 20%, transparent);
+	animation: notePop 0.5s cubic-bezier(0.2, 1.25, 0.25, 1) both;
+}
+
+.grid-cell.active::after {
+	content: "";
+	position: absolute;
+	inset: -40%;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.38), transparent 58%);
+	opacity: 0.32;
+	animation: noteGlow 2.4s ease-in-out infinite;
 }
 
 .info-panel {
@@ -423,6 +625,10 @@ button:hover {
 	border: 1px solid var(--border);
 	border-radius: 18px;
 	padding: 14px;
+	transition:
+		transform 0.2s ease,
+		background 0.2s ease,
+		border-color 0.2s ease;
 }
 
 .metric-card span {
@@ -443,6 +649,114 @@ button:hover {
 	border: 1px solid var(--border);
 	border-radius: 18px;
 	padding: 14px;
+	transition:
+		transform 0.2s ease,
+		background 0.2s ease,
+		border-color 0.2s ease;
+}
+
+@keyframes pageReveal {
+	from {
+		opacity: 0;
+		transform: translateY(18px) scale(0.985);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes gridDrift {
+	from {
+		background-position: 0 0;
+	}
+	to {
+		background-position: 48px 48px;
+	}
+}
+
+@keyframes floatOrb {
+	0%,
+	100% {
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	50% {
+		transform: translate3d(28px, 32px, 0) scale(1.08);
+	}
+}
+
+@keyframes equalizerPulse {
+	0%,
+	100% {
+		transform: scaleY(0.55) translateZ(0);
+	}
+	50% {
+		transform: scaleY(1.15) translateZ(26px);
+	}
+}
+
+@keyframes shimmer {
+	0%,
+	45% {
+		transform: translateX(-55%);
+	}
+	70%,
+	100% {
+		transform: translateX(55%);
+	}
+}
+
+@keyframes badgeFloat {
+	0%,
+	100% {
+		transform: translateY(0) rotateX(0deg);
+	}
+	50% {
+		transform: translateY(-6px) rotateX(4deg);
+	}
+}
+
+@keyframes cellIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.94);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes notePop {
+	from {
+		opacity: 0;
+		transform: translateZ(0) scale(0.65);
+	}
+	to {
+		opacity: 1;
+		transform: translateZ(18px) scale(1);
+	}
+}
+
+@keyframes noteGlow {
+	0%,
+	100% {
+		transform: translateX(-20%) rotate(0deg);
+	}
+	50% {
+		transform: translateX(20%) rotate(12deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.001ms !important;
+	}
 }
 
 .pattern-note-list h3 {
